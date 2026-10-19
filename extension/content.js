@@ -52,6 +52,11 @@
     return (Math.round(v * 10) / 10).toString();
   }
 
+  // POPS as a decimal to three significant digits, e.g. 0.938, 0.750, 1.00.
+  function fmtPops(points, available) {
+    return (points / available).toPrecision(3);
+  }
+
   function addCells(row, a, b, tag) {
     var ref = row.cells[gamesCol].nextSibling;
     [a, b].forEach(function (text) {
@@ -97,7 +102,7 @@
       teamPts += s.points;
       teamAvail += s.available;
       ptsCell.textContent = fmtPoints(s.points);
-      popsCell.textContent = (100 * s.points / s.available).toFixed(1) + '%';
+      popsCell.textContent = fmtPops(s.points, s.available);
       popsCell.title = fmtPoints(s.points) + ' of ' + fmtPoints(s.available) + ' available in ' + s.games + ' completed games';
     });
 
@@ -109,7 +114,7 @@
       tr.cells[gamesCol - 1].textContent = 'Team';
       tr.cells[gamesCol + 1].textContent = fmtPoints(teamPts);
       tr.cells[gamesCol + 1].className = 'text-xs-center';
-      tr.cells[gamesCol + 2].textContent = (100 * teamPts / teamAvail).toFixed(1) + '%';
+      tr.cells[gamesCol + 2].textContent = fmtPops(teamPts, teamAvail);
       tr.cells[gamesCol + 2].className = 'text-xs-center';
       playerRows[playerRows.length - 1].parentNode.appendChild(tr);
     }

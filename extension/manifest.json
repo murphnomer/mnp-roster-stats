@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MNP Roster Stats",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Adds Points and POPS columns to Monday Night Pinball match roster pages.",
   "host_permissions": [
     "https://www.mondaynightpinball.com/*",
