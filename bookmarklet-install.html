@@ -37,6 +37,7 @@
   h1, h2 { font-family: var(--font-display); font-weight: 700; line-height: 1.1; text-wrap: balance; margin: 0; }
   h1 { font-size: 2.2rem; letter-spacing: 0.01em; }
   h2 { font-size: 1.35rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+  h3 { font: 600 1.05rem var(--font-body); margin: 4px 0 0; }
   p { margin: 0; }
   .lede { color: var(--muted); max-width: 34rem; }
   section { display: grid; gap: 12px; }
@@ -82,7 +83,7 @@
   <header style="display:grid;gap:8px">
     <span class="eyebrow">Monday Night Pinball · v{{VERSION}}</span>
     <h1>Roster Stats bookmarklet</h1>
-    <p class="lede">Adds <b>Points</b> and <b>POPS</b> columns to any match's team roster page. Works in Chrome and Safari on iPhone and iPad, where extensions aren't available.</p>
+    <p class="lede">Adds <b>Points</b> and <b>POPS</b> columns to any match's team roster page. Works in Chrome on Android, iPhone and iPad, where extensions aren't available, and in Safari.</p>
   </header>
 
   <section aria-labelledby="code-h">
@@ -97,8 +98,15 @@
     </div>
   </section>
 
-  <section aria-labelledby="ios-h">
-    <h2 id="ios-h">2 · Save it in Chrome on iPhone</h2>
+  <section aria-labelledby="save-h">
+    <h2 id="save-h">2 · Save it as a bookmark</h2>
+    <h3>Chrome on Android</h3>
+    <ol>
+      <li>Open any web page, tap <span class="ui">⋮</span> and tap the <span class="ui">☆</span> star to bookmark it.</li>
+      <li>Tap <span class="ui">⋮</span> → <span class="ui">Bookmarks</span>, tap <span class="ui">⋮</span> next to the new bookmark and choose <span class="ui">Edit</span>.</li>
+      <li>Rename it to <b>MNP Stats</b>. Clear the URL field, paste the code, and go back to save.</li>
+    </ol>
+    <h3>Chrome on iPhone or iPad</h3>
     <ol>
       <li>Open any web page, tap <span class="ui">⋯</span> and choose <span class="ui">Add to Bookmarks</span>.</li>
       <li>Tap <span class="ui">⋯</span> → <span class="ui">Bookmarks</span>, press and hold the new bookmark and choose <span class="ui">Edit Bookmark</span>.</li>
@@ -111,7 +119,7 @@
     <h2 id="use-h">3 · Use it on a roster page</h2>
     <ol>
       <li>Open a match and tap a team name to reach its roster (the address ends in <code>/home</code> or <code>/away</code>).</li>
-      <li>Tap the address bar, type <b>MNP Stats</b>, and tap the bookmark in the suggestions. In Chrome on iOS, opening it from the Bookmarks list doesn't run it.</li>
+      <li>Tap the address bar, type <b>MNP Stats</b>, and tap the bookmark in the suggestions. In Chrome on a phone, opening it from the Bookmarks list doesn't run it.</li>
     </ol>
     <p class="note">In Safari, just open it from the Bookmarks list.</p>
   </section>
@@ -123,6 +131,10 @@
       <div>
         <dt>Safari on iPhone or iPad</dt>
         <dd>Install the free <b>Userscripts</b> app from the App Store and turn it on under Settings → Apps → Safari → Extensions. Then open the <a href="{{BASE}}mnp-roster-stats.user.js">userscript</a> in Safari, open the Userscripts extension menu and tap <span class="ui">Install</span>.</dd>
+      </div>
+      <div>
+        <dt>Firefox on Android</dt>
+        <dd>In Firefox, tap <span class="ui">⋮</span> → <span class="ui">Extensions</span> and add <b>Violentmonkey</b> or <b>Tampermonkey</b>. Then open the <a href="{{BASE}}mnp-roster-stats.user.js">userscript</a> and tap <span class="ui">Install</span>.</dd>
       </div>
       <div>
         <dt>Chrome, Edge or Firefox on a computer</dt>

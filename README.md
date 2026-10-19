@@ -13,8 +13,9 @@ The data comes from the match's round pages (`?round=1` to `4`), which the scrip
 
 ## Install
 
-See the install page on this repo's GitHub Pages site. It has a bookmarklet (works in Chrome on iOS),
-the userscript (Tampermonkey, Violentmonkey, or the Userscripts app for Safari on iOS), and the
+See the install page at https://murphnomer.github.io/mnp-roster-stats/. It has a bookmarklet (works in
+Chrome on Android and iOS), the userscript (Tampermonkey or Violentmonkey, including Firefox on Android,
+or the Userscripts app for Safari on iOS), and the
 browser extension zip for Chrome and Firefox.
 
 ## Development
