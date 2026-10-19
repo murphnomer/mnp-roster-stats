@@ -1,0 +1,31 @@
+{
+  "manifest_version": 3,
+  "name": "MNP Roster Stats",
+  "version": "1.1.0",
+  "description": "Adds Points and POPS columns to Monday Night Pinball match roster pages.",
+  "host_permissions": [
+    "https://www.mondaynightpinball.com/*",
+    "https://mondaynightpinball.com/*"
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.mondaynightpinball.com/matches/*/home",
+        "https://www.mondaynightpinball.com/matches/*/away",
+        "https://mondaynightpinball.com/matches/*/home",
+        "https://mondaynightpinball.com/matches/*/away"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "mnp-roster-stats@mnpmod",
+      "strict_min_version": "140.0",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  }
+}
