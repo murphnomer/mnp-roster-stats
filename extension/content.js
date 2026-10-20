@@ -36,11 +36,18 @@
     return hit ? JSON.parse(hit[1]) : null;
   }
 
+  // Asking for a round that hasn't started returns the latest round instead (mid-match, ?round=4
+  // can be round 1), so trust the page's own "Round: N" heading, not the number we asked for.
   function fetchRound(n) {
     return fetch(location.origin + '/matches/' + matchKey + '?round=' + n, { credentials: 'same-origin' })
       .then(function (r) { return r.text(); })
       .then(function (html) {
-        return { round: n, games: extractVar(html, 'games') || [], labels: extractVar(html, 'labels') || {} };
+        var shown = html.match(/<b>Round:\s*(\d+)\s*<\/b>/);
+        return {
+          round: shown ? Number(shown[1]) : null,
+          games: extractVar(html, 'games') || [],
+          labels: extractVar(html, 'labels') || {}
+        };
       });
   }
 
@@ -73,8 +80,12 @@
   Promise.all([1, 2, 3, 4].map(fetchRound)).then(function (rounds) {
     // name -> { points, available, games }
     var stats = {};
+    var counted = {};
     rounds.forEach(function (rd) {
       var max = MAX_POINTS[rd.round];
+      // Skip pages that are a repeat of a round already counted, or that aren't a round at all.
+      if (!max || counted[rd.round]) return;
+      counted[rd.round] = true;
       rd.games.forEach(function (g) {
         if (!g.done) return;
         for (var p = 1; p <= 4; p++) {
