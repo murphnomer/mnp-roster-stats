@@ -1,0 +1,284 @@
+<title>MNP Roster Stats</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400&display=swap">
+<style>
+  /* Layout: one narrow phone-first column. Each install method is a section tagged with the platforms
+     it suits (data-for); the script shows only the visitor's, with a "Show all options" escape hatch. */
+  :root {
+    --bg: #f3f5f8;
+    --surface: #ffffff;
+    --fg: #17202c;
+    --muted: #586474;
+    --line: #d8dee6;
+    --accent: #0b7a75;
+    --accent-fg: #ffffff;
+    --hi: #b8620a;
+    --font-display: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+    --font-body: 'Source Sans 3', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, Menlo, Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #10161e; --surface: #18212c; --fg: #e6ebf1; --muted: #9aa6b4; --line: #2a3644;
+      --accent: #3fb8b0; --accent-fg: #06201f; --hi: #f0a04b; color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #10161e; --surface: #18212c; --fg: #e6ebf1; --muted: #9aa6b4; --line: #2a3644;
+    --accent: #3fb8b0; --accent-fg: #06201f; --hi: #f0a04b; color-scheme: dark;
+  }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--bg); color: var(--fg);
+    font: 1rem/1.55 var(--font-body);
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 28px 48px;
+  }
+  main { max-width: 40rem; margin: 0 auto; display: grid; gap: 32px; }
+  h1, h2 { font-family: var(--font-display); font-weight: 700; line-height: 1.1; text-wrap: balance; margin: 0; }
+  h1 { font-size: 2.2rem; letter-spacing: 0.01em; }
+  h2 { font-size: 1.35rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--accent); }
+  h3 { font: 600 1.05rem var(--font-body); margin: 6px 0 0; }
+  p { margin: 0; }
+  .lede { color: var(--muted); max-width: 34rem; }
+  section, .group { display: grid; gap: 12px; }
+  .eyebrow { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.85rem; color: var(--hi); }
+
+  .platform {
+    display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline;
+    background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+  }
+  .code-box { display: grid; gap: 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+  textarea {
+    width: 100%; box-sizing: border-box; height: 6.5rem; resize: vertical;
+    font: 0.72rem/1.4 var(--font-mono); color: var(--fg); background: var(--bg);
+    border: 1px solid var(--line); border-radius: 6px; padding: 8px; word-break: break-all;
+  }
+  textarea.wrap { white-space: pre; word-break: normal; overflow-x: auto; height: 9rem; }
+  .actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+  button, .button, .drag {
+    font: 600 1rem var(--font-body); border-radius: 8px; padding: 10px 16px; cursor: pointer;
+    border: 1px solid var(--accent); text-decoration: none; display: inline-block; justify-self: start;
+  }
+  button, .button { background: var(--accent); color: var(--accent-fg); }
+  .drag { background: transparent; color: var(--accent); cursor: grab; }
+  button.link { background: none; border: 0; padding: 0; color: var(--accent); font-size: 0.95rem; text-decoration: underline; }
+  button:focus-visible, .button:focus-visible, .drag:focus-visible, textarea:focus-visible, a:focus-visible {
+    outline: 3px solid var(--hi); outline-offset: 2px;
+  }
+  .status { color: var(--muted); font-size: 0.9rem; min-height: 1.4em; }
+
+  ol { margin: 0; padding-left: 1.4rem; display: grid; gap: 10px; }
+  li::marker { font-family: var(--font-display); font-weight: 700; color: var(--accent); }
+  .ui { font-weight: 600; white-space: nowrap; }
+  .note { font-size: 0.92rem; color: var(--muted); }
+
+  .table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+  table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; font-size: 0.95rem; }
+  th, td { padding: 7px 12px; text-align: center; border-bottom: 1px solid var(--line); }
+  th { font-family: var(--font-display); font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; font-size: 0.85rem; color: var(--muted); }
+  th:first-child, td:first-child { text-align: left; }
+  .new { color: var(--hi); }
+  tfoot td { font-weight: 600; border-bottom: 0; }
+  a { color: var(--accent); }
+  details summary { cursor: pointer; font-weight: 600; }
+  details > :not(summary) { margin-top: 12px; }
+</style>
+
+<main>
+  <header style="display:grid;gap:8px">
+    <span class="eyebrow">Monday Night Pinball · v{{VERSION}}</span>
+    <h1>MNP Roster Stats</h1>
+    <p class="lede">Adds <b>Points</b> and <b>POPS</b> columns to any match's team roster page, so you can see how everyone's doing while the match is on.</p>
+  </header>
+
+  <p class="platform" id="platform" hidden>
+    <span>Showing install steps for <b id="platform-name"></b>.</span>
+    <button type="button" class="link" id="show-all">Show all options</button>
+  </p>
+
+  <!-- Safari on iPhone / iPad -->
+  <section data-for="ios-safari" aria-labelledby="ios-safari-h">
+    <h2 id="ios-safari-h">Safari on iPhone or iPad</h2>
+
+    <!--if-shortcut-link-->
+    <div class="group">
+      <h3>Quickest: the MNP Stats shortcut</h3>
+      <a class="button" href="{{SHORTCUT_URL}}">Add the MNP Stats shortcut</a>
+      <ol>
+        <li>Tap the button above, then tap <span class="ui">Add Shortcut</span>.</li>
+        <li>Open a team roster page, tap <span class="ui">Share</span> and choose <b>MNP Stats</b>. The first time, allow it to access mondaynightpinball.com.</li>
+      </ol>
+      <p class="note">It loads the latest version every time, so there's nothing to update. If it says running scripts isn't allowed, go to Settings → Apps → Shortcuts → Advanced and turn on <span class="ui">Allow Running Scripts</span>.</p>
+    </div>
+    <!--/if-shortcut-link-->
+
+    <!--if-shortcut-link--><details><summary>Or build the shortcut yourself</summary><!--/if-shortcut-link-->
+    <!--if-no-shortcut-link--><details open><summary>Quickest: build the MNP Stats shortcut</summary><!--/if-no-shortcut-link-->
+      <ol>
+        <li>Copy the shortcut code below.</li>
+        <li>Open the <b>Shortcuts</b> app and tap <span class="ui">+</span> to start a new shortcut.</li>
+        <li>Tap <span class="ui">Search Actions</span>, search for <b>Run JavaScript on Webpage</b> and add it.</li>
+        <li>In that action, select all the sample code and paste the shortcut code over it.</li>
+        <li>Tap <span class="ui">ⓘ</span> (or the name at the top → <span class="ui">Details</span>) and turn on <span class="ui">Show in Share Sheet</span>. If the action doesn't read "Run JavaScript on Shortcut Input", tap its web page field and choose <span class="ui">Shortcut Input</span>.</li>
+        <li>Rename the shortcut <b>MNP Stats</b> and tap <span class="ui">Done</span>.</li>
+        <li>To use it, open a team roster page, tap <span class="ui">Share</span> and choose <b>MNP Stats</b>.</li>
+      </ol>
+      <div class="code-box">
+        <textarea id="shortcut-code" class="wrap" readonly spellcheck="false" aria-label="Shortcut code">{{SHORTCUT_JS}}</textarea>
+        <div class="actions"><button type="button" data-copy="shortcut-code" data-status="shortcut-status">Copy shortcut code</button></div>
+        <p class="status" id="shortcut-status" role="status"></p>
+      </div>
+    </details>
+
+    <div class="group">
+      <h3>Runs on its own: the Userscripts app</h3>
+      <p>Install the free <b>Userscripts</b> app from the App Store and turn it on under Settings → Apps → Safari → Extensions. Then open the <a href="{{BASE}}mnp-roster-stats.user.js">userscript</a> in Safari, open the Userscripts extension menu and tap <span class="ui">Install</span>. After that the columns appear by themselves and the script updates itself.</p>
+    </div>
+  </section>
+
+  <!-- Bookmarklet: Chrome on phones, any browser on a computer -->
+  <section data-for="ios-chrome ios-other android-chrome desktop" aria-labelledby="bm-h">
+    <h2 id="bm-h">Bookmarklet</h2>
+    <p>A bookmark that adds the columns when you tap it. It loads the latest version every time, so you only set it up once.</p>
+    <div class="code-box">
+      <textarea id="bm-code" readonly spellcheck="false" aria-label="Bookmarklet code">{{BOOKMARKLET}}</textarea>
+      <div class="actions">
+        <button type="button" data-copy="bm-code" data-status="bm-status">Copy code</button>
+        <a class="drag" id="drag" data-for="desktop" href="{{BOOKMARKLET}}" title="Drag to your bookmarks bar">MNP Stats</a>
+      </div>
+      <p class="status" id="bm-status" role="status"></p>
+    </div>
+
+    <div class="group" data-for="android-chrome">
+      <h3>Save it in Chrome on Android</h3>
+      <ol>
+        <li>Open any web page, tap <span class="ui">⋮</span> and tap the <span class="ui">☆</span> star to bookmark it.</li>
+        <li>Tap <span class="ui">⋮</span> → <span class="ui">Bookmarks</span>, tap <span class="ui">⋮</span> next to the new bookmark and choose <span class="ui">Edit</span>.</li>
+        <li>Rename it to <b>MNP Stats</b>. Clear the URL field, paste the code, and go back to save.</li>
+      </ol>
+    </div>
+    <div class="group" data-for="ios-chrome ios-other">
+      <h3>Save it in Chrome on iPhone or iPad</h3>
+      <ol>
+        <li>Open any web page, tap <span class="ui">⋯</span> and choose <span class="ui">Add to Bookmarks</span>.</li>
+        <li>Tap <span class="ui">⋯</span> → <span class="ui">Bookmarks</span>, press and hold the new bookmark and choose <span class="ui">Edit Bookmark</span>.</li>
+        <li>Rename it to <b>MNP Stats</b>. Clear the URL field, paste the code, and tap <span class="ui">Done</span>.</li>
+      </ol>
+      <p class="note" data-for="ios-other">In Safari, the shortcut is easier. Use <button type="button" class="link" data-show-all>Show all options</button> to see it.</p>
+    </div>
+    <div class="group" data-for="desktop">
+      <h3>Save it on a computer</h3>
+      <p>Drag the <b>MNP Stats</b> button to your bookmarks bar. If Chrome sync is on, it shows up on your phone too.</p>
+    </div>
+
+    <div class="group">
+      <h3>Use it</h3>
+      <ol>
+        <li>Open a match and tap a team name to reach its roster (the address ends in <code>/home</code> or <code>/away</code>).</li>
+        <li data-for="ios-chrome ios-other android-chrome">Tap the address bar, type <b>MNP Stats</b>, and tap the bookmark in the suggestions. Opening it from the Bookmarks list doesn't run it.</li>
+        <li data-for="desktop">Click <b>MNP Stats</b> in your bookmarks bar.</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Firefox on Android -->
+  <section data-for="android-firefox android-chrome" aria-labelledby="ffa-h">
+    <h2 id="ffa-h">Firefox on Android</h2>
+    <p data-for="android-chrome" class="note">Want it to run by itself, with no tapping? Firefox can do that.</p>
+    <ol>
+      <li>In Firefox, tap <span class="ui">⋮</span> → <span class="ui">Extensions</span> and add <b>Violentmonkey</b> or <b>Tampermonkey</b>.</li>
+      <li>Open the <a href="{{BASE}}mnp-roster-stats.user.js">userscript</a> and tap <span class="ui">Install</span>.</li>
+    </ol>
+    <p class="note">The columns then appear on every roster page, and the script updates itself.</p>
+  </section>
+
+  <!-- Computer -->
+  <section data-for="desktop" aria-labelledby="desk-h">
+    <h2 id="desk-h">Runs on its own on a computer</h2>
+    <div class="group">
+      <h3>Chrome, Edge or Firefox with a userscript manager</h3>
+      <p>Install the <b>Tampermonkey</b> or <b>Violentmonkey</b> extension, then open the <a href="{{BASE}}mnp-roster-stats.user.js">userscript</a> and click <span class="ui">Install</span>. It updates itself.</p>
+    </div>
+    <div class="group">
+      <h3>Chrome without a userscript manager</h3>
+      <p>Download the <a href="{{BASE}}mnp-roster-stats.zip">extension zip</a> and unzip it. Go to <code>chrome://extensions</code>, turn on <span class="ui">Developer mode</span>, click <span class="ui">Load unpacked</span> and pick the unzipped folder.</p>
+    </div>
+  </section>
+
+  <section aria-labelledby="ex-h">
+    <h2 id="ex-h">What it adds</h2>
+    <p class="note">Example from a real match, with player names replaced. The new columns are highlighted.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Name</th><th>Games</th><th class="new">Points</th><th class="new">POPS</th></tr></thead>
+        <tbody>
+          <tr><td>Player A (SUB)</td><td>(3)</td><td class="new">7.5</td><td class="new">0.938</td></tr>
+          <tr><td>Player B</td><td>(3)</td><td class="new">6</td><td class="new">0.750</td></tr>
+          <tr><td>Player C</td><td>(3)</td><td class="new">6</td><td class="new">0.706</td></tr>
+          <tr><td>Player D</td><td>(3)</td><td class="new">3.5</td><td class="new">0.438</td></tr>
+        </tbody>
+        <tfoot><tr><td>Team</td><td></td><td class="new">45</td><td class="new">0.549</td></tr></tfoot>
+      </table>
+    </div>
+    <details>
+      <summary>How POPS is calculated</summary>
+      <p>POPS is points earned divided by points available in the games a player has finished, shown as a decimal (0.750 means 75% of the available points). Each game is worth 2.5 points per player in rounds 1 and 4 (doubles) and 3 points in rounds 2 and 3 (singles). Games still in progress aren't counted.</p>
+    </details>
+  </section>
+</main>
+
+<script>
+  // Pick the visitor's platform and show only the install steps for it.
+  var PLATFORMS = {
+    'ios-safari': 'Safari on iPhone or iPad',
+    'ios-chrome': 'Chrome on iPhone or iPad',
+    'ios-other': 'your iPhone or iPad',
+    'android-chrome': 'Chrome on Android',
+    'android-firefox': 'Firefox on Android',
+    'desktop': 'a computer'
+  };
+  function detectPlatform() {
+    var ua = navigator.userAgent;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+    if (ios) return /CriOS/.test(ua) ? 'ios-chrome' : /FxiOS|EdgiOS|OPiOS/.test(ua) ? 'ios-other' : 'ios-safari';
+    if (/Android/.test(ua)) return /Firefox/.test(ua) ? 'android-firefox' : 'android-chrome';
+    return 'desktop';
+  }
+  var taggedEls = document.querySelectorAll('[data-for]');
+  function showAll() {
+    taggedEls.forEach(function (el) { el.hidden = false; });
+    document.getElementById('platform').hidden = true;
+  }
+  var platform = detectPlatform();
+  taggedEls.forEach(function (el) { el.hidden = el.getAttribute('data-for').split(' ').indexOf(platform) === -1; });
+  document.getElementById('platform-name').textContent = PLATFORMS[platform];
+  document.getElementById('platform').hidden = false;
+  document.getElementById('show-all').addEventListener('click', showAll);
+  document.querySelectorAll('[data-show-all]').forEach(function (b) { b.addEventListener('click', showAll); });
+
+  // Copy buttons, falling back to selecting the text where the clipboard is refused.
+  document.querySelectorAll('[data-copy]').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      var box = document.getElementById(btn.getAttribute('data-copy'));
+      var status = document.getElementById(btn.getAttribute('data-status'));
+      function selectIt() {
+        box.focus();
+        box.setSelectionRange(0, box.value.length);
+        status.textContent = 'Selected. Tap Copy in the menu to copy it.';
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(box.value).then(function () { status.textContent = 'Copied.'; }, selectIt);
+      } else {
+        selectIt();
+      }
+    });
+  });
+
+  // The drag link only exists to be dragged to the bookmarks bar; clicking it here would do nothing useful.
+  document.getElementById('drag').addEventListener('click', function (e) {
+    e.preventDefault();
+    document.getElementById('bm-status').textContent = 'Drag this button to your bookmarks bar, or use Copy code.';
+  });
+</script>

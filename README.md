@@ -27,5 +27,10 @@ browser extension zip for Chrome and Firefox.
 node build.mjs
 ```
 
-That writes the site to `dist/site/`. Pushing to `main` builds and deploys it to GitHub Pages
+That writes the site to `dist/site/`. The install page template is `install-page.html`; it shows each
+visitor only the steps for their device.
+
+The bookmarklet and the iOS Shortcut are small loaders that fetch `mnp-roster-stats.payload.js` from the
+site each time, so they pick up new versions without being re-copied. Once the shared Shortcut exists, put
+its iCloud link in `site.json` (`shortcutUrl`) and the page shows an "Add the MNP Stats shortcut" button. Pushing to `main` builds and deploys it to GitHub Pages
 (`.github/workflows/pages.yml`). Userscript installs pick up the new version on their next update check.

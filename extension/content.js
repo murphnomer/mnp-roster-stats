@@ -77,7 +77,8 @@
   addCells(headerRow, 'Points', 'POPS');
   playerRows.forEach(function (r) { addCells(r, '…', ''); });
 
-  Promise.all([1, 2, 3, 4].map(fetchRound)).then(function (rounds) {
+  // Returned so the loader (bookmarklet, iOS Shortcut) can tell when the columns are filled in.
+  return Promise.all([1, 2, 3, 4].map(fetchRound)).then(function (rounds) {
     // name -> { points, available, games }
     var stats = {};
     var counted = {};
